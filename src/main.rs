@@ -1,6 +1,7 @@
 use actix_files::NamedFile;
 use actix_web::{get, App, HttpResponse, HttpServer, Result, Responder};
 use actix_web::http::header::{ContentDisposition, DispositionType};
+// use actix_web::http::header::{CacheControl, CacheDirective};
 use log::info;
 
 #[get("/")]
@@ -13,6 +14,8 @@ async fn file() -> Result<NamedFile> {
     info!("{}", "about to serve the file");
     let file = NamedFile::open("docs/magna-carta.pdf")?;
     Ok(file
+        .use_etag(false)
+        .use_last_modified(false)
         .set_content_disposition(ContentDisposition {
             disposition: DispositionType::Inline,
             parameters: vec![],
