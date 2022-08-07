@@ -1,16 +1,17 @@
 use actix_files::NamedFile;
-use actix_web::{get, App, HttpResponse, HttpServer, Result, Responder};
+use actix_web::{get, App, Error, HttpResponse, HttpRequest, HttpServer, Result, Responder};
 use actix_web::http::header::{ContentDisposition, DispositionType};
 // use actix_web::http::header::{CacheControl, CacheDirective};
 use log::info;
 
 #[get("/")]
-async fn root() -> impl Responder {
+async fn root(req: HttpRequest) -> impl Responder {
+    info!("request uri: {}", req.uri());
     HttpResponse::Ok().body("Hello world!")
 }
 
 #[get("/file")]
-async fn file() -> Result<NamedFile> {
+async fn file(req: HttpRequest) -> Result<HttpResponse, Error> {
     info!("{}", "about to serve the file");
     let file = NamedFile::open("docs/magna-carta.pdf")?;
     Ok(file
@@ -19,7 +20,9 @@ async fn file() -> Result<NamedFile> {
         .set_content_disposition(ContentDisposition {
             disposition: DispositionType::Inline,
             parameters: vec![],
-        }))
+        })
+        .into_response(&req)
+    )
 }
 
 #[actix_web::main]
