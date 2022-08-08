@@ -1,17 +1,24 @@
 use actix_files::NamedFile;
-use actix_web::{get, App, Error, HttpResponse, HttpRequest, HttpServer, Result, Responder};
+use actix_web::{get, web, App, Error, HttpResponse, HttpRequest, HttpServer, Result, Responder};
 use actix_web::http::header::{self, ContentDisposition, DispositionType, HeaderValue};
 use log::info;
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+pub struct Name {
+   name: Option<String>,
+}
 
 #[get("/")]
-async fn root(req: HttpRequest) -> impl Responder {
+async fn root(req: HttpRequest, info: web::Query<Name>) -> impl Responder {
     info!("request uri: {}", req.uri());
+    info!("name: {:?}", info.name);
     HttpResponse::Ok().body("Hello world!")
 }
 
-#[get("/file-no-store")]
+#[get("/file")]
 async fn file(req: HttpRequest) -> Result<HttpResponse, Error> {
-    info!("{}", "file-no-cache hit");
+    info!("{}", "file hit");
     let file = NamedFile::open("docs/magna-carta.pdf")?;
     let mut response = file
         .use_etag(false)
