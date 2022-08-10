@@ -1,4 +1,6 @@
-# Actix Web Hello World
+# Actix Web Playground
+
+A place to learn more about the [Actix](https://actix.rs/) web framework and Rust.
 
 ## Installation
 
