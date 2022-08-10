@@ -34,12 +34,15 @@ async fn file(req: HttpRequest, info: web::Query<CacheControl>) -> Result<HttpRe
         })
         .into_response(&req);
 
-    let headers = response.headers_mut();
+    add_cache_control_header(&response, info);
+    Ok(response)
+}
+
+fn add_cache_control_header(response: &HttpResponse, info: web::Query<CacheControl>) {
     if let Some(cache_control_value) = &info.cache_control {
+         let headers = response.headers_mut();
          headers.insert(header::CACHE_CONTROL, HeaderValue::from_str(cache_control_value).unwrap());
     }
-
-    Ok(response)
 }
 
 #[actix_web::main]
