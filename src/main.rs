@@ -9,6 +9,11 @@ pub struct Name {
    name: Option<String>,
 }
 
+#[derive(Deserialize)]
+pub struct CacheControl {
+   cache_control: Option<String>,
+}
+
 #[get("/")]
 async fn root(req: HttpRequest, info: web::Query<Name>) -> impl Responder {
     info!("request uri: {}", req.uri());
@@ -17,7 +22,7 @@ async fn root(req: HttpRequest, info: web::Query<Name>) -> impl Responder {
 }
 
 #[get("/file")]
-async fn file(req: HttpRequest) -> Result<HttpResponse, Error> {
+async fn file(req: HttpRequest, info: web::Query<CacheControl>) -> Result<HttpResponse, Error> {
     info!("{}", "file hit");
     let file = NamedFile::open("docs/magna-carta.pdf")?;
     let mut response = file
@@ -30,7 +35,9 @@ async fn file(req: HttpRequest) -> Result<HttpResponse, Error> {
         .into_response(&req);
 
     let headers = response.headers_mut();
-    headers.insert(header::CACHE_CONTROL, HeaderValue::from_static("no-store"));
+    if let Some(cache_control_value) = &info.cache_control {
+         headers.insert(header::CACHE_CONTROL, HeaderValue::from_str(cache_control_value).unwrap());
+    }
 
     Ok(response)
 }
